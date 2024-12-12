@@ -1,0 +1,3 @@
+iamService:
+  image: kypnt/iam-service:latest
+  containerPort: 9001

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-service-deploy
+  labels:
+    name: frontend-service-deploy
+spec: 
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      name: frontend-service-pod
+  template:
+    metadata:
+      labels:
+        name: frontend-service-pod
+    spec:
+      #hostAliases:
+      #- ip: "51.142.213.135"
+        #hostnames:
+        #- "azure.examinion.com"     
+      containers:
+      - name: frontend-service
+        image: kypnt/etop-dev-fe-service
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      imagePullSecrets:  #The image could not pull because the dockerhub repository is private. We created a secret credentials for this and gave it a name (regcred). Then we added these two lines here (imagePullSecrets and -name).
+      - name: regcred    #kubectl create secret docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=kypnt --docker-password=Cloud123qwe* --docker-email=info@kypnt.co.uk #https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      #tolerations:
+      #- key: "talrise"
+        #operator: "Equal"
+        #value: "worker-2"
+        #effect: "NoSchedule"
+      #nodeSelector:
+        #node: be-fe

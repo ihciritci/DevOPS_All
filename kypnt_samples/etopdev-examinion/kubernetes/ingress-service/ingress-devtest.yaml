@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ingress.class: "etop-dev-ingressc"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: ingress-devtest-frontend
+  namespace: etop-dev
+spec:
+  ingressClassName: etop-dev-ingressc
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  tls:
+   - hosts:
+     - devtest.examinion.com
+     secretName: tls-auto-devtest-examinion
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ingress.class: "etop-dev-ingressc"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  name: ingress-devtest-backend
+  namespace: etop-dev
+spec:
+  ingressClassName: etop-dev-ingressc
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: test-service
+            port:
+              number: 8080
+        path: /backend(/|$)(.*)
+        pathType: Prefix
+  tls:
+   - hosts:
+     - devtest.examinion.com 
+     secretName: tls-auto-devtest-examinion

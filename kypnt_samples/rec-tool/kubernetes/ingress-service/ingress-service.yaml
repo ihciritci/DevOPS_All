@@ -1,0 +1,71 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-rectool-backend
+  annotations:
+    #kubernetes.io/ingress.class: nginx  
+    #nginx.ingress.kubernetes.io/ssl-redirect: "true" #default degeri 'true'dur  "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:  
+  - hosts:
+      - app.talrise.com
+    secretName: talriseazure-tlsx1  
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /iam(/|$)(.*)
+        pathType: Prefix        
+        backend:
+          service:
+            name: iam-service-service
+            port:
+              number: 9001
+      - path: /rec(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: rec-service-service
+            port:
+              number: 9002
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-rectool-frontend
+  annotations:
+    #kubernetes.io/ingress.class: nginx  
+    #nginx.ingress.kubernetes.io/ssl-redirect: "false" #default degeri 'true'dur  "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    #nginx.ingress.kubernetes.io/rewrite-target: /$2
+    #nginx.ingress.kubernetes.io/custom-http-errors: "404=/"   
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    #nginx.ingress.kubernetes.io/default-backend: fallback-/
+spec:
+  tls:  
+  - hosts:
+      - app.talrise.com
+    secretName: talriseazure-tlsx1  
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service-service
+            port:
+              number: 80
+      - path: /fallback    #tekrardan redirect yapmak istedigin yolun path (/) yani fallback path 
+        pathType: Prefix 
+        backend: 
+          service: 
+            name: frontend-service-service 
+            port: 
+              number: 80

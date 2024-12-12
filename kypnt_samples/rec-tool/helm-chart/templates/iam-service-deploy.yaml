@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-service-deploy
+  labels:
+    name: iam-service-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: iam-service-pod
+  template:
+    metadata:
+      labels:
+        name: iam-service-pod
+    spec:
+      initContainers:
+      - name: wait-for-db-postgres
+        image: busybox
+        command: ['sh', '-c', "until nslookup postgresql-pod; do echo waiting for postgresql-pod; sleep 2; done"]
+      containers:
+        - name: iam-service
+          image: {{ .Values.iamService.image }}
+          imagePullPolicy: Always
+          ports:
+          - containerPort: {{ .Values.iamService.containerPort }}

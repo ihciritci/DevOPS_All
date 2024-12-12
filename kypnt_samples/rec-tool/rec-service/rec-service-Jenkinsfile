@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+    tools {
+        maven "maven"
+    }
+
+    environment {
+        GITHUB_REPO = "https://github.com/kypnt/infrastructure.git"
+        GITHUB_BRANCH = "*/main"
+        SERVICE_NAME="rec-service"
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
+    stages {
+        stage('Clone code from Github') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: GITHUB_BRANCH]], extensions: [], userRemoteConfigs: [[credentialsId: 'omeraritoken', url: GITHUB_REPO]]])
+            }
+        }
+    stage('Docker Login') {
+            steps {
+        sh 'echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin'
+            }
+    }
+        stage('Build Container Image and Push to Dockerhu') {
+            steps {
+            echo "Stopping Service..."
+            sh "docker stop ${SERVICE_NAME} || true"
+            echo "Removing Container..."
+            sh "docker rm -f \$(docker ps -aqf \"name=${SERVICE_NAME}\") || true"
+            echo "Removing Image..."
+            sh "docker rmi \$(docker images | grep '${SERVICE_NAME}') || true"
+            echo "Building Image..."
+            sh "rm -f ./*.war"
+            //sh "cp /var/lib/jenkins/workspace/com-kypnt-rec-tool-rec-svc/target/*.war ." 
+            sh "cp ${params.WORKSPACE}/target/*.war ."
+            sh "DOCKER_BUILDKIT=1 docker build --file=${SERVICE_NAME}-Dockerfile --tag=${DOCKERHUB_CREDENTIALS_USR}/${SERVICE_NAME}:${params.VER} --rm=true --progress=plain --no-cache ."
+            echo "Tagged Image..."
+            sh "docker tag ${DOCKERHUB_CREDENTIALS_USR}/${SERVICE_NAME}:${params.VER} ${DOCKERHUB_CREDENTIALS_USR}/${SERVICE_NAME}:latest"
+            echo "Push image to Dockerhub..."
+            sh "docker push ${DOCKERHUB_CREDENTIALS_USR}/${SERVICE_NAME}:${params.VER}"
+            sh "docker push ${DOCKERHUB_CREDENTIALS_USR}/${SERVICE_NAME}:latest"
+           }
+        }
+       stage('Deploy rec-service via sshagent') {
+            steps {
+                sshagent(['backend-server']) {
+                  sh 'scp -o StrictHostKeyChecking=no ./.env ./docker-compose.yml root@172.31.20.209:/home/ubuntu' 
+                  sh 'ssh -o StrictHostKeyChecking=no root@172.31.20.209 docker-compose -f /home/ubuntu/docker-compose.yml --env-file /home/ubuntu/.env up -d'
+                }
+            }
+        }
+    }
+}

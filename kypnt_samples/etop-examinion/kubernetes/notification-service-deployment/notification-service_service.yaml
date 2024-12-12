@@ -1,0 +1,33 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: rec-service-service
+#   #annotations: 
+#     #alb.ingress.kubernetes.io/healthcheck-path: /rec-service
+#   labels:
+#     app: rec-service-service
+# spec:  
+#   type: NodePort
+#   ports:
+#   - port: 9002         ##this is the service port #the port was added after
+#     protocol: TCP
+#     targetPort: 9002     #this is the container port
+#     nodePort: 30002 #9002
+#   selector:
+#     app: rec-service-pod
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service-service
+  labels:
+    name: notification-service-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 9003
+    protocol: TCP
+    targetPort: 9003
+    #nodeport: 30002
+  selector:
+    name: notification-service-pod

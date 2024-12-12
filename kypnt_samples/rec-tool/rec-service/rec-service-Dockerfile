@@ -1,0 +1,19 @@
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:11.0.7-jre-slim-buster
+
+# set shell to bash
+# source: https://stackoverflow.com/a/40944512/3128926
+#RUN apk update && apk add bash
+RUN apt-get update && apt-get install jq curl -y 
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the war into the container at /app
+COPY /*.war /app/app.war
+
+# Make port 9002 available to the world outside this container
+EXPOSE 9002
+
+# Run war file when the container launches
+CMD ["java", "-jar", "/app/app.war"]

@@ -1,0 +1,38 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: iam-service-service
+#   #annotations:
+#     #alb.ingress.kubernetes.io/healthcheck-path: /iam-service
+#   labels:
+#     app: iam-service-service
+# spec:
+#   type: NodePort
+#   ports:
+#   - port: 9001 #80        #this is the service port #the port was added after
+#     protocol: TCP
+#     targetPort: 9001   #this is the container port
+#     nodePort: 30001 #9001
+#   selector:
+#     app: iam-service-pod
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: iam-service-service
+  #annotations:
+    #alb.ingress.kubernetes.io/healthcheck-path: /iam-service
+  labels:
+    name: iam-service-service
+spec:
+  type: LoadBalancer 
+  ports:
+  - port: 9001 #80         #the port was added after
+    protocol: TCP
+    targetPort: 9001
+   #nodePort: 30001 #9001
+  selector:
+    name: iam-service-pod
+ 
+
+  

@@ -1,0 +1,122 @@
+version: '3.9'
+services:
+
+  database:
+    image: postgres:14.4
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres #ostock_dev
+    volumes:
+        - "/postgresql:/var/lib/postgresql/data"
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        #- ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      - kypnt-etop-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway-server:
+    image: kypnt/gateway-server:latest
+    container_name: gateway-server
+    ports:
+      - "8072:8072"
+    environment:
+      PROFILE: "local"
+      SPRING_PROFILES_ACTIVE: "local"
+      ORGANIZATION_SERVICE_URL: http://organization-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+      TEST_CENTRE_SERVICE_URL: http://test-centre-service:8083
+      SPRING_KAFKA_BOOTSTRAP-SERVERS: kafka:9092
+      SPRING_ZIPKIN_URL: zipkin:9411
+      LOGSTASH_URL: logstash:5000 
+    restart: always
+    networks:
+      - kypnt-etop-network
+
+  organization-service:
+    image: kypnt/organization-service:latest
+    container_name: organization-service
+    ports:
+      - "8081:8081"
+    environment:
+      PROFILE: "local"
+      SPRING_PROFILES_ACTIVE: "local"
+      DATABASE_URL: jdbc:postgresql://db:5432/postgres?currentSchema=organization-service
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP-SERVERS: kafka:9092
+      SPRING_ZIPKIN_URL: zipkin:9411
+      LOGSTASH_URL: logstash:5000 
+    restart: always
+    depends_on:
+      gateway-server:
+        condition: service_started
+    networks:
+      - kypnt-etop-network
+
+  user-service:
+    image: kypnt/user-service:latest
+    container_name: user-service
+    ports:
+      - "8082:8082"
+    environment:
+      PROFILE: "local"
+      SPRING_PROFILES_ACTIVE: "local"
+      ORGANIZATION_SERVICE_URL: http://organization-service:8081
+      DATABASE_URL: jdbc:postgresql://db:5432/postgres?currentSchema=user-service
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP-SERVERS: kafka:9092  
+      SPRING_ZIPKIN_URL: zipkin:9411
+      LOGSTASH_URL: logstash:5000 
+    restart: always
+    depends_on:
+      gateway-server:
+        condition: service_started
+      organization-service:
+        condition: service_started
+    networks:
+      - kypnt-etop-network
+
+  test-centre-service:
+    image: kypnt/test-centre-service:latest
+    container_name: test-centre-service
+    ports:
+      - "8083:8083"
+    environment:
+      PROFILE: "local"
+      SPRING_PROFILES_ACTIVE: "local"
+      ORGANIZATION_SERVICE_URL: http://organization-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+      LOGGING_LEVEL_ROOT: "INFO"
+      DATABASE_URL: jdbc:postgresql://db:5432/postgres?currentSchema=test-centre-service
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP-SERVERS: kafka:9092
+      SPRING_ZIPKIN_URL: zipkin:9411
+      LOGSTASH_URL: logstash:5000 
+    restart: always
+    depends_on:
+      gateway-server:
+        condition: service_started
+      organization-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    networks:
+      - kypnt-etop-network
+
+volumes:
+  postgresql:
+
+networks:
+  kypnt-etop-network:
+    driver: bridge

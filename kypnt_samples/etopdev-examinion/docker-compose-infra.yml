@@ -1,0 +1,178 @@
+version: '3.9'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.1.1
+    container_name: zookeeper
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kypnt-etop-network
+  kafka:
+    # "`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-
+    # An important note about accessing Kafka from clients on other machines: 
+    # -----------------------------------------------------------------------
+    #
+    # The config used here exposes port 29092 for _external_ connections to the broker
+    # i.e. those from _outside_ the docker network. This could be from the host machine
+    # running docker, or maybe further afield if you've got a more complicated setup. 
+    # If the latter is true, you will need to change the value 'localhost' in 
+    # KAFKA_ADVERTISED_LISTENERS to one that is resolvable to the docker host from those 
+    # remote clients
+    #
+    # For connections _internal_ to the docker network, such as from other services
+    # and components, use kafka:9092.
+    #
+    # See https://rmoff.net/2018/08/02/kafka-listeners-explained/ for details
+    # "`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-
+    #
+    image: confluentinc/cp-kafka:7.1.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka:9092 --list
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - kypnt-etop-network
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - 9000:9000
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+    networks: 
+      - kypnt-etop-network
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - kypnt-etop-network
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9300:9300
+      - 9200:9200
+    networks:
+      - kypnt-etop-network
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.7.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: "http://elasticsearch:9300"
+    ports:
+      - 5601:5601
+    networks:
+      - kypnt-etop-network
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.7.0
+    container_name: logstash
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - .:/etc/logstash/conf.d
+    ports:
+      - 5000:5000
+    networks:
+      - kypnt-etop-network
+  zipkin: 
+    image: openzipkin/zipkin 
+    container_name: zipkin
+    depends_on: 
+      - elasticsearch
+    environment: 
+      - STORAGE_TYPE=elasticsearch
+      - "ES_HOSTS=elasticsearch:9300"
+    ports:
+      - 9411:9411
+    networks:
+      - kypnt-etop-network
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090" 
+    volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    container_name: prometheus
+    networks:
+      - kypnt-etop-network
+  grafana:
+    image: "grafana/grafana:latest"
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    container_name: grafana 
+    networks:
+      - kypnt-etop-network
+
+  database:
+    image: postgres:14.4
+    container_name: database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres #ostock_dev
+    volumes:
+        - "/postgresql:/var/lib/postgresql/data"
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        #- ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      - kypnt-etop-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgresql:
+  grafana-storage:
+  esdata1:
+    driver: local
+
+networks:
+  kypnt-etop-network:
+    driver: bridge

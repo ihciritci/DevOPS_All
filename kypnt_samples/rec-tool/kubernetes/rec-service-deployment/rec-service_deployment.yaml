@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rec-service-deploy
+  labels:
+    name: rec-service-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: rec-service-pod
+  template:
+    metadata:
+      labels:
+        name: rec-service-pod
+    spec:
+      #initContainers:
+      #- name: wait-for-db-postgres
+        #image: busybox
+        #command: ['sh', '-c', "until nslookup postgresql-pod; do echo waiting for postgresql-pod; sleep 2; done"]
+      containers:
+      - name: rec-service
+        image: kypnt/rec-service
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9002 #9001
+        livenessProbe:
+          tcpSocket:
+            port: 9002
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        env:
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: SPRING_DATASOURCE_PASSWORD
+          #env:
+          #- name: spring.profiles.active
+            #ValueFrom:
+              #configMapKeyRef:
+                #name: postgresql-configmap
+                #key: spring.profiles.active
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://postgresql-service:5432/rectool?currentSchema=candidate
+            #ValueFrom:
+              #configMapKeyRef:
+                #name: SPRING_DATASOURCE_URL
+        env:
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+              #ValueFrom:
+                #configMapKeyRef:
+                  #name: postgresql-configmap
+                  #key: SPRING_DATASOURCE_USERNAME
+      imagePullSecrets:
+      - name: regcred
+      #tolerations:
+      #- key: "talrise"
+        #operator: "Equal"
+        #value: "worker-2"
+        #effect: "NoSchedule"

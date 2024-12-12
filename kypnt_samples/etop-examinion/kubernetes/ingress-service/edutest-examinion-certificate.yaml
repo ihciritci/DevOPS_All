@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: edutest-examinion-cert
+spec:
+  secretName: tls-auto-edutest-examinion
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod-edutest-examinion
+  commonName: "edutest.examinion.com"
+  dnsNames:
+    - "edutest.examinion.com"

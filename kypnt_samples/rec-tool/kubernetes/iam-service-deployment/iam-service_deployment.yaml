@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-service-deploy
+  labels:
+    name: iam-service-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: iam-service-pod
+  template:
+    metadata:
+      labels:
+        name: iam-service-pod
+    spec:
+      #initContainers:
+      #- name: wait-for-db-postgres
+        #image: busybox
+        #command: ['sh', '-c', "until nslookup postgresql-deploy*; do echo waiting for postgresql-deploy*; sleep 2; done"]
+      containers:
+      - name: iam-service
+        image: kypnt/iam-service
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+        livenessProbe:
+          tcpSocket:
+            port: 9001
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        env:
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: SPRING_DATASOURCE_PASSWORD
+          #env:
+          #- name: spring.profiles.active
+            #ValueFrom:
+              #configMapKeyRef:
+                #name: postgresql-configmap
+                #key: spring.profiles.active
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://postgresql-service:5432/rectool?currentSchema=candidate
+            #ValueFrom:
+              #configMapKeyRef:
+                #name: SPRING_DATASOURCE_URL
+        env:
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+            #ValueFrom:
+              #secretKeyRef:
+                #name: postgresql-secret
+                #key: SPRING_DATASOURCE_USERNAME
+      imagePullSecrets:  #The image could not pull because the dockerhub repository is private. We created a secret credentials for this and gave it a name (regcred). Then we added these two lines here (imagePullSecrets and -name).
+      - name: regcred    #imperative method; kubectl create secret docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=kypnt --docker-password=Cloud123qwe* --docker-email=info@kypnt.co.uk #https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      #tolerations:
+      #- key: "talrise"
+        #operator: "Equal"
+        #value: "worker-2"
+        #effect: "NoSchedule"
+
+        #kubectl exec -it postgresql-deploy-74f6bd7db7-g89wl -- psql --port=5432 --username=postgres --dbname=rectool

@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notification-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internal
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /notification
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-service
+                port:
+                  number: 9003

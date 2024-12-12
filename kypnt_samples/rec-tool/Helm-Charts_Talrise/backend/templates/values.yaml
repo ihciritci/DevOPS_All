@@ -1,0 +1,17 @@
+# Backend Deployment values
+backend:
+  image:
+    repository: your-backend-image
+    tag: latest
+  replicaCount: 1
+
+# Backend Service values
+service:
+  name: backend-service
+  port: 9000
+
+# Backend Ingress values
+ingress:
+  enabled: true
+  #host: example.com # Gerçek alan adınızı buraya yazın
+  path: /api
