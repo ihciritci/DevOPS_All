@@ -1,0 +1,73 @@
+stages:
+  - pre_build
+  - publish
+  - post_publish
+
+pre_build_cleanup:
+  stage: pre_build
+  tags: 
+    - AppServerDev_zerreactor_Backend
+  
+  script:
+    - sudo chown -R gitlab-runner:gitlab-runner /home/gitlab-runner/builds/
+    - sudo chmod -R 777 /home/gitlab-runner/builds/
+
+    - |
+      if [ -d "/home/gitlab-runner/builds/" ]; then
+        sudo  rm -r /home/gitlab-runner/builds/
+        echo "gitlab-runner/builds directory removed."
+      else
+        echo "Gitlab-runner/builds directory"
+      fi
+    - |
+      if [ -d "/var/www/old_backend/" ]; then
+        sudo rm -r /var/www/old_backend/
+        echo "/var/www/old_backend directory removed."
+      else
+        echo "/var/www/old_backend directory does not exist."
+      fi
+    - |
+      if [ -d "var/www/backend/" ]; then
+        sudo  mv /var/www/backend/ /var/www/old_backend/
+        echo "new backup folder ok"
+        sudo  rm -r /var/www/backend/
+        echo "/var/www/backend folder removed."
+      else
+        echo "/var/www/backend folder not ok."
+      fi
+    - |
+      if [ ! -d "/var/www/backend/" ]; then
+       sudo mkdir -p /var/www/backend
+       echo "New backend directory created."
+      else
+        echo "Backend directory already exists."
+      fi
+    - sudo chown -R gitlab-runner:gitlab-runner /var/www/backend
+    - sudo chmod -R ugo+rwx /var/www/backend
+
+publish_project:
+  stage: publish
+  tags:
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "publish starts"
+    - sudo dotnet publish -c Release -o /var/www/backend
+    - echo "publish ok"
+    - sudo systemctl restart backend.service
+    - echo "application service restarted "
+
+post_publis_cleanup:
+  stage: post_publish
+  tags: 
+    - AppServerDev_zerreactor_Backend
+  script:
+    - sudo  chown -R gitlab-runner:gitlab-runner /home/gitlab-runner/builds/
+    - sudo chmod -R 777 /home/gitlab-runner/builds/
+
+    - |
+      if [ -d "/home/gitlab-runner/builds/" ]; then
+        sudo  rm -r /home/gitlab-runner/builds/
+        echo "gitlab-runner/builds directory removed."
+      else
+        echo "Gitlab-runner/builds directory"
+      fi

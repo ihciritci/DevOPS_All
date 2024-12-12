@@ -1,0 +1,112 @@
+    1  sudo apt update -y & sudo apt upgrade -y
+    2  sudo apt-get install -y curl openssh-server ca-certificates tzdata perl
+    3  sudo curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | sudo bash
+    4  sudo apt-get install gitlab-ee
+    5  sudo gitlab-ctl reconfigure
+    6  sudo apt-get install gitlab-eesudo gitlab-ctl statussudo gitlab-ctl statussudo gitlab-ctl status
+    7  ls
+    8  ps -aux
+    9  sudo cat /etc/gitlab/initial_root_password
+   10  cat/etc/gitlab/gitlab.rb
+
+
+
+##### --------------  ######
+
+sudo apt install -y ca-certificates curl openssh-server tzdata
+sudo apt install curl debian-archive-keyring lsb-release ca-certificates apt-transport-https software-properties-common -y
+
+gpg_key_url="https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey"
+sudo tee /etc/apt/sources.list.d/gitlab_gitlab-ce.list<<EOF
+deb https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ focal main
+deb-src https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ focal main
+EOF
+
+sudo apt update
+sudo apt install gitlab-ce
+
+vim /etc/gitlab/gitlab.rb
+external_url 'http://git.linuxpedi.com'   # “externel_url” param
+
+sudo gitlabctl-reconfigure
+http://<gitlabce-ip>.<local>
+cat /etc/gitlab/initial_root_password
+
+
+##### --------------  ######
+
+
+apt update -y
+apt upgrade -y
+
+apt install curl debian-archive-keyring lsb-release ca-certificates apt-transport-https software-properties-common -y
+
+gpg_key_url="https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey"
+curl -fsSL $gpg_key_url| gpg --dearmor -o /etc/apt/trusted.gpg.d/gitlab.gpg
+
+nano /etc/apt/sources.list.d/gitlab_gitlab-ce.list  
+  deb https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ focal main
+  deb-src https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ focal main
+
+apt update -y
+
+apt install gitlab-ce -y
+                  # configuration in /etc/gitlab/gitlab.rb file.
+
+nano /etc/gitlab/gitlab.rb 
+      external_url 'http://gitlab.yourdomain.com'
+
+gitlab-ctl reconfigure
+
+         Notes:
+         Default admin account has been configured with following details:
+         Username: root
+         Password: You didn't opt-in to print initial root password to STDOUT.
+         Password stored to /etc/gitlab/initial_root_password. This file will be cleaned up in first reconfigure run after 24 hours.
+         NOTE: Because these credentials might be present in your log files in plain text, it is highly recommended to reset the password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
+         gitlab Reconfigured!
+
+gitlab-rake gitlab:check    #  verify the GitLab configuration using the following command.
+
+
+                # Access GitLab
+cat /etc/gitlab/initial_root_password
+
+            #### Install Let's Encrypt SSL on GitLab  ###
+
+nano /etc/gitlab/gitlab.rb
+    external_url 'https://gitlab.yourdomain.com'
+
+    letsencrypt['enable'] = true
+    letsencrypt['contact_emails'] = ['user@yourdomain.com']
+    letsencrypt['auto_renew'] = true
+    letsencrypt['auto_renew_hour'] = 3
+    letsencrypt['auto_renew_day_of_month'] = "*/7" 
+
+
+gitlab-ctl reconfigure
+
+          #*****---------------
+          gitlab-rake 'gitlab:password:reset[root]'     # to reset your GitLab root password
+          gitlab-ctl status    # To verify the status of GitLab
+
+          gitlab-ctl stop     # To stop the GitLab
+
+          gitlab-ctl restart  #To restart the GitLab, 
+
+
+
+
+
+
+
+
+
+  
+##### --------------  ######
+
+
+##### --------------  ######
+
+
+##### --------------  ######

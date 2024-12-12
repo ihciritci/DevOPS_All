@@ -1,0 +1,23 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOTNET_VERSION: "6.0"  # Kullanacağınız .NET versiyonu
+  DEPLOY_PATH: "/var/www/myapp"  # Projenin deploy edileceği path
+  GIT_STRATEGY: fetch  # Git işlemleri için fetch stratejisi
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}
+  script:
+    - dotnet restore
+    - dotnet publish -c Release -o publish/
+
+deploy:
+  stage: deploy
+  script:
+    - mkdir -p ${DEPLOY_PATH}
+    - cp -r publish/* ${DEPLOY_PATH}/
+  only:
+    - main  # Sadece main branch üzerinde çalışacak

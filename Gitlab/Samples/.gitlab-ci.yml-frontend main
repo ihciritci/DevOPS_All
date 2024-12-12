@@ -1,0 +1,42 @@
+stages:
+  - installing
+  - building
+  - deploying
+
+install_project:
+ stage: installing
+ tags:
+    - AppServerProd1_Zerreactor_Frontend
+ only:
+    - main
+ script:
+    - echo "Installing dependencies..."
+    - sudo -u gitlab-runner npm install
+ artifacts:
+    paths:
+      - node_modules/
+  
+
+build_project:
+ stage: building
+ tags:
+    - AppServerProd1_Zerreactor_Frontend
+ only:
+    - main
+ script:
+    - echo "Building project..."
+    - sudo -u gitlab-runner INSTALL_PATH=/var/www/frontend/dist npm run build
+ artifacts:
+    paths:
+      - /var/www/frontend/dist
+
+deploy_project:
+ stage: deploying
+ tags:
+    - AppServerProd1_Zerreactor_Frontend
+ only:
+    - main
+ script:
+    - echo "Deploying project..."
+    - sudo -u gitlab-runner INSTALL_PATH=/var/www/frontend/dist npm run start
+    - echo "Application started."

@@ -1,0 +1,42 @@
+# .net yaml Sample-RemoteDeploy-Simple2
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOTNET_VERSION: "6.0"  # .NET versiyonu
+  DEPLOY_PATH: "/var/www/myapp"
+  REMOTE_SERVER: "user@yourserver.com"
+  SSH_PRIVATE_KEY: "/path/to/your/private/key"
+  GIT_STRATEGY: fetch  # Git işlemleri için fetch stratejisi
+
+before_script:
+  - echo "Starting pipeline for .NET project"
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}
+  script:
+    - dotnet restore
+    - dotnet build --no-restore
+    - dotnet publish -c Release -o publish/
+  artifacts:
+    paths:
+      - publish/
+
+test:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}
+  script:
+    - dotnet test --no-build --verbosity normal
+
+deploy:
+  stage: deploy
+  script:
+    - mkdir -p ${DEPLOY_PATH}
+    - scp -i ${SSH_PRIVATE_KEY} -r publish/* ${REMOTE_SERVER}:${DEPLOY_PATH}/
+    - ssh -i ${SSH_PRIVATE_KEY} ${REMOTE_SERVER} "systemctl restart myapp"
+  only:
+    - main  # Sadece main branch üzerinde çalışacak

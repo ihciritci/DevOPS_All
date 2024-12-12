@@ -1,0 +1,152 @@
+##############  Gitlab-Runner installation Samples from net ###############################3
+
+# Linux x86-64
+sudo curl -L --output /usr/local/bin/gitlab-runner "https://s3.dualstack.us-east-1.amazonaws.com/gitlab-runner-downloads/latest/binaries/gitlab-runner-linux-amd64"
+sudo chmod +x /usr/local/bin/gitlab-runner
+sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+sudo gitlab-runner start
+
+sudo systemctl start gitlab-runner
+sudo systemctl enable gitlab-runner
+
+
+curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+chmod +x /usr/local/bin/gitlab-runner
+useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+gitlab-runner start
+
+sudo systemctl start gitlab-runner
+sudo systemctl enable gitlab-runner
+
+########  Upgrade    ########
+sudo gitlab-runner stop
+sudo curl -L --output /usr/local/bin/gitlab-runner "https://s3.dualstack.us-east-1.amazonaws.com/gitlab-runner-downloads/latest/binaries/gitlab-runner-linux-amd64"
+sudo chmod +x /usr/local/bin/gitlab-runner
+sudo gitlab-runner start
+
+########################################
+
+# save GitLab Runner to project
+
+sudo gitlab-runner register
+
+
+
+*----------------------------------------------------------*
+sudo apt-get install gitlab-runner
+sudo gitlab-runner install --user=your-username --working-directory=/home/your-username
+sudo gitlab-runner start
+
+
+*----------------------------------------------------------*
+
+sudo curl -L --output /usr/local/bin/gitlab-runner  https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbnhmZzZObkRWa04xM3lBTUo5WG1EeVF6NU05d3xBQ3Jtc0tsbDZOeEthakZVbVJhWEhDTlB6OW9NbnJta2Iwb0FBUjExNWZ4NkdIUTExSkZYRVFmRGhIcXFnSkVQWlB0NEd4M2ZWcFdTNzduM25ORVRpeTZjYXliZUJ0aFFaVEN6V2FIZ0QtTG0xcEwzdUNOZmtMQQ&q=https%3A%2F%2Fgitlab-runner-downloads.s3.amazonaws.com%2Flatest%2Fbinaries%2Fgitlab-runner-linux-amd64&v=dVDqEST0CMI
+sudo chmod +x /usr/local/bin/gitlab-runner
+sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+
+sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+sudo gitlab-runner start
+
+sudo gitlab-runner register --url https://gitlab.com/ --registration-token $REGISTRATION_TOKEN
+sudo systemctl start gitlab-runner
+sudo systemctl enable gitlab-runner
+*----------------------------------------------------------*
+# Grant sudo Permission to GitLab Runner User..... gitlab-runner user in /home directory
+
+cd /home
+ls
+         gitlab-runner ubuntu
+
+sudo visudo   # To grant sudo permission to GitLab-runner user, open the visudo file
+
+ #Add the gitlab-runner user in sudoers group and set NOPASSWD as shown below
+
+gitlab-runner ALL=(ALL:ALL) ALL
+gitlab-runner ALL=(ALL) NOPASSWD: ALL 
+
+# Output:   visudo 
+
+        # User privilege specification
+        root    ALL=(ALL:ALL) ALL
+        gitlab-runner ALL=(ALL:ALL) ALL
+        # Members of the admin group may gain root privileges
+        %admin ALL=(ALL) ALL
+
+        # Allow members of group sudo to execute any command
+        %sudo   ALL=(ALL:ALL) ALL
+
+        # See sudoers(5) for more information on "@include" directives:
+
+        @includedir /etc/sudoers.d
+        gitlab-runner ALL=(ALL) NOPASSWD: ALL
+
+# to register GitLab Runner to GitLab on Ubuntu 22.04 LTS
+gitlab-runner register --name project-name-runner --url https://gitlab.(your Project).com --registration-token  UqsdexTMzsXhXJx3zgM
+
+
+
+
+
+*----------------------------------------------------------*
+
+
+
+*----------------------------------------------------------*
+# Download the binary for your system
+sudo curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+
+# Give it permission to execute
+sudo chmod +x /usr/local/bin/gitlab-runner
+
+# Create a GitLab Runner user
+sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+
+# Install and run as a service
+sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+sudo gitlab-runner start
+
+# Command to register runner
+sudo gitlab-runner register --url gitlab_url--registration-token TOKEN
+sudo gitlab-runner register --url https://gitlab.example.net/ --registration-token zJ3AijxmGmarcwhvq336
+
+#******* Command to register runner with SSL   ******************************
+sudo gitlab-runner register --url https://gitlab.example.net/ --registration-token TOKEN --tls-ca-file /my/path/gitlab/gitlab.myserver.com.pem
+sudo gitlab-runner register --url https://gitlab.example.net/ --registration-token  CKMCokGX2YzzzsJbto36 --tls-ca-file /etc/ssl/certs/gitlab/gitlab.crt
+
+
+
+*----------------------------------------------------------*
+
+
+
+*----------------------------------------------------------*
+ # Uninstall GitLab Runner from Ubuntu 22.04 LTS
+
+ sudo apt purge --autoremove -y gitlab-runner  
+ sudo apt-key del 51312F3F
+ sudo rm -rf /etc/apt/sources.list.d/runner_gitlab-runner.list
+ sudo deluser --remove-home gitlab-runner
+ sudo rm -rf /etc/gitlab-runner
+
+
+
+
+
+
+*----------------------------------------------------------*
+ # you can promt all params only one line 
+sudo gitlab-runner register \
+  --non-interactive \
+  --name "AppServerDev1_Zerreactor_Frontend" \
+  --url "http://20.93.3.185/" \
+  --registration-token "GR134" \
+  --executor "shell" \
+  --tag-list "AppServerDev_zerreactor_Frontend" \
+  --run-untagged="true" \
+  --locked="false" \
+  --access-level="not_protected"
+
+
+  *----------------------------------------------------------*

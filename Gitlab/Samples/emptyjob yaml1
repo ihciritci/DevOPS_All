@@ -1,0 +1,37 @@
+# emptyjob yaml1
+
+
+stages:
+  - build
+  - publish
+  
+build_project:
+  stage: build
+  tags: 
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "build starts"
+    - chmod -R u+w /home/gitlab-runner/
+    - echo "folder  permission ok"
+    - echo "Qaz.321" | sudo -S rm -r /home/gitlab-runner/builds
+    - echo "old folder removed"
+ 
+    - echo "build ok"
+
+publish_project:
+  stage: publish
+  tags:
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "publish starts"
+    - chmod -R u+w /home/gitlab-runner/
+    - echo "folder  permission ok"
+    - echo "Qaz.321" | sudo -S rm -r /var/www/old.backend -y
+    - echo "old folder removed"
+    - echo "Qaz.321" | sudo -S mv -r /var/www/backend /var/www/old.backend  -y 
+    - echo "new backup folder ok"
+    - echo "publis will start"
+    
+    - echo "publish ok"
+    
+    - echo "application service restarted"

@@ -1,0 +1,47 @@
+ stages:
+  - installing
+  - building
+  - deploying
+
+ install_project:
+ stage: installing
+  tags:
+    - AppServerDev1_Zerreactor_Frontend
+  only:
+    - dev
+  script:
+    - echo "Installing dependencies..."
+    - npm install
+  artifacts:
+    paths:
+      - node_modules/
+    cache:
+      key: ${CI_COMMIT_REF_SLUG}
+      paths:
+        - node_modules/
+
+build_project:
+  stage: building
+  tags:
+    - AppServerDev1_Zerreactor_Frontend
+  only:
+    - dev
+  script:
+    - echo "Building project..."
+    - INSTALL_PATH=/var/www/frontend/dist npm run build
+  artifacts:
+    paths:
+      - /var/www/frontend/dist
+
+deploy_project:
+  stage: deploying
+  tags:
+    - AppServerDev1_Zerreactor_Frontend
+  only:
+    - dev
+  script:
+    - echo "Deploying project..."
+    - INSTALL_PATH=/var/www/frontend/dist npm run start
+    - echo "Application started."
+  only:
+    - dev 

@@ -1,0 +1,52 @@
+
+
+# Shell executor fails to prepare environment in Ubuntu
+# ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information
+
+
+#I only removed ~gitlab-runner/.bash_logout which clears the console. That works.
+#This is on Debian 10(buster)
+
+cat .bash_logout
+# ~/.bash_logout: executed by bash(1) when login shell exits.
+
+# when leaving the console clear the screen to increase privacy
+
+if [ "$SHLVL" = 1 ]; then
+    [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q
+fi
+
+
+
+
+variables:
+   FF_POSIXLY_CORRECT_ESCAPES: "true"
+
+
+############################333333
+
+TroubleShooting_1
+
+# issue
+ERROR: Job failed: prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information
+
+# result
+sudo su gitlab-runner
+cd ..
+cd gitlab-runner
+rm -rf .bash_logout
+
+
+###############3
+
+
+sudo chown -R gitlab-runner:gitlab-runner /home/gitlab-runner/builds/
+sudo -u gitlab-runner mkdir /var/www/backend
+
+
+gitlab-runner@AppServerDev:~$ sudo chown gitlab-runner:gitlab-runner /home/gitlab-runner/builds/
+gitlab-runner@AppServerDev:~$ sudo chown -R gitlab-runner:gitlab-runner /home/gitlab-runner/builds/
+gitlab-runner@AppServerDev:~$ sudo chown -R gitlab-runner:gitlab-runner /var/www/frontend/
+gitlab-runner@AppServerDev:~$ sudo chmod -R 777 builds/
+
+

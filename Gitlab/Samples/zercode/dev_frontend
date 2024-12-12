@@ -1,0 +1,42 @@
+stages:
+  - installing
+  - building
+ variables:
+  INSTALL_PATH: "/var/www/frontend/dist"
+
+ #before_script:
+#  - if ! node -v; then curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -  && sudo apt install -y nodejs ;fi
+   # if ! node -v; then
+   # -node -v || (curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -  && sudo apt install -y nodejs)
+ install_project:
+  stage: installing
+  tags:
+    - AppServerDev1_Zerreactor_Frontend 
+  only:
+    - dev
+  script:
+    - echo "Installing dependencies..."
+    - sudo -su gitlab-runner
+    - npm install 
+  artifacts:
+    paths:
+      - node_modules/
+
+ build_project:
+  stage: building
+  tags:
+    - AppServerDev1_Zerreactor_Frontend
+  only:
+    - dev
+  script:
+    - echo "Building project..."
+    - npm run build
+    - echo "Builded ..."
+    - sudo cp -r dist/*  $INSTALL_PATH
+    - sudo systemctl restart frontend
+    - sudo systemctl restart nginx
+    - echo "frontend service  restarted."
+
+  artifacts:
+    paths:
+      - /var/www/frontend/dist

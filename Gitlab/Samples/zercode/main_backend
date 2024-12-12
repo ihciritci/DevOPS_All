@@ -1,0 +1,30 @@
+stages:
+  - cleanup
+  - publish
+
+cleanup:
+  stage: cleanup
+  tags: 
+    - AppServerProd1_Zerreactor_Backend
+  only:
+    - main
+  before_script:
+  - echo "Cleanup process starts"
+  - sudo -u gitlab-runner git clean -fdx
+  - chmod -R 777 .
+  script:
+   - echo "git process started"
+
+
+publish_project:
+  stage: publish
+  tags:
+    - AppServerProd1_Zerreactor_Backend
+  only:
+    - main
+  script:
+    - echo "publish starts"
+    - sudo -u gitlab-runner dotnet publish -c Release -o /var/www/backend
+    - echo "publish ok"
+    - sudo  systemctl restart backend.service
+    - echo "application service restarted "

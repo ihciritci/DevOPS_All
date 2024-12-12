@@ -1,0 +1,18 @@
+The maximum size of the job artifacts can be set at:
+
+** The value is in MB and the default is 100MB per job.
+
+# To change it at the instance level:
+
+On the top bar, select Menu > Admin. On the left sidebar, select Settings > CI/CD. Change the value of maximum artifacts size (in MB). Select Save changes for the changes to take effect. Group level (this overrides the instance setting):
+
+** To change it at the group level:
+
+Go to the group’s Settings > CI/CD > General Pipelines. Change the value of maximum artifacts size (in MB). Select Save changes for the changes to take effect. Project level (this overrides the instance and group settings):
+
+** To change it at the project level:
+
+Go to the project’s Settings > CI/CD > General Pipelines. Change the value of maximum artifacts size (in MB). Select Save changes for the changes to take effect.
+
+Ref: Maximum artifacts size
+

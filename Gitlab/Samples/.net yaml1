@@ -1,0 +1,27 @@
+# .net yaml1
+
+stages:
+  - build
+  - publish
+  
+build_project:
+  stage: build
+  tags: 
+    - AppServerDev1
+  script:
+    - sudo dotnet build Zerreactor.sln
+
+publish_project:
+  stage: publish
+  tags:
+    - AppServerDev1
+  script:
+    - sudo rm -r /var/www/old.backend -y
+    - sudo mv -r /var/www/backend /var/www/old.backend  -y 
+    - sudo  dotnet publish -0 /var/www/backend/ -c Release
+    - sudo systemctl restart backend.service
+	
+
+# dotnet 8
+# 
+# 

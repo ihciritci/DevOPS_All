@@ -1,0 +1,42 @@
+stages:
+  - pre_build
+  - build
+  - pre_publish
+  - publish
+
+pre_build_cleanup:
+  stage: pre_build
+  tags: 
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "Qaz.321" | sudo -S rm -r /home/gitlab-runner/builds/
+    - echo "Old folder removed"
+build_project:
+  stage: build
+  tags: 
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "build starts"
+    - echo "Qaz.321" | sudo -S dotnet build Zerreactor.sln
+    - echo "build ok"
+
+pre_publish_cleanup:
+  stage: pre_publish
+  tags: 
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "Qaz.321" | sudo -S rm -r /var/www/old.backend/ -y
+    - echo "old folder removed"
+    - echo "Qaz.321" | sudo -S mv -r /var/www/backend/ /var/www/old.backend/  -y 
+    - echo "new backup folder ok"
+
+publish_project:
+  stage: publish
+  tags:
+    - AppServerDev_zerreactor_Backend
+  script:
+    - echo "publish starts"
+    - echo "Qaz.321" | sudo -S dotnet publish -0 /var/www/backend/ -c Release
+    - echo "publish ok"
+    - echo "Qaz.321" | sudo -S systemctl restart backend.service
+    - echo "application service restarted
