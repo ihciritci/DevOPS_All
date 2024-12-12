@@ -1,0 +1,37 @@
+## https://portainer.github.io/k8s/charts/portainer/
+
+kubectl create namespace portainer
+
+helm repo add portainer https://portainer.github.io/k8s/
+helm repo update
+
+helm install --dry-run --debug portainer -n portainer deploy/helm/portainer           # test 
+
+$ helm install --create-namespace -n portainer portainer portainer/portainer
+$ helm install --create-namespace -n portainer portainer portainer/portainer --set service.type=LoadBalancer    # Expose Portainer with a load balancer
+
+helm upgrade -i -n portainer portainer portainer/portainer                      # setup
+
+                    ## Delete the Helm Chart
+helm delete -n portainer portainer
+                    ## Delete the Namespace
+kubectl delete namespace portainer
+
+
+$ helm install --create-namespace -n portainer portainer portainer/portainer
+
+$ helm upgrade -n  portainer portainer portainer/portainer --set service.type=LoadBalancer
+
+$ kubectl apply -f https://downloads.portainer.io/ce2-19/portainer-agent-k8s-lb.yaml
+
+$ kgs -n portainer
+
+NAME                       TYPE           CLUSTER-IP    EXTERNAL-IP     PORT(S)                                        AGE
+portainer                  LoadBalancer   10.0.65.95    52.142.91.191   9000:30777/TCP,9443:30779/TCP,8000:30776/TCP   7m29s
+portainer-agent            LoadBalancer   10.0.87.116   52.142.94.232   9001:32326/TCP                                 2m3s
+portainer-agent-headless   ClusterIP      None          <none>          <none>                                         2m3s
+
+
+
+                # connect portainer
+https://xx.xx.xx.xx:9443
