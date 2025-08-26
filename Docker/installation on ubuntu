@@ -21,3 +21,8 @@ sudo systemctl status docker
 
 sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose docker-compose-plugin
 
+3. Şifreyi unuttuysan resetle
+
+wsl -d Ubuntu-24.04 --user root
+
+passwd ibrahim
