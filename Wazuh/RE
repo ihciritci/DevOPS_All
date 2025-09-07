@@ -1,0 +1,53 @@
+100107 - SSH Brute-force attack detected
+100121 - Port scan detected
+100202 - Possible Nmap scan detected
+5710 - TCP Port scan detected
+5712 - UDP Port scan detected
+
+Kuralların tamamını /var/ossec/ruleset/rules/ dizininde bulabilirsin.
+
+
+
+2. Wazuh Kibana Dashboard'da İzleme
+
+Wazuh'un Kibana (Elasticsearch) Dashboard'unda port taramalarını şu şekilde izleyebilirsin:
+
+Wazuh → Security Events → Rule ID 100121 ve 5710
+Wazuh → Dashboard → Top Attacking IPs
+Wazuh → Network Activity → Anomalous Traffic                                                                                                                     Linux için kritik filtrelemen gereken ruleID setleri:
+
+
+
+SSH/Authentication:      5710–5766
+
+Sudo/Privilege:              5400–5420
+
+User Management:         5500–5516
+
+Suspicious Processes:     6000–6200
+
+File Integrity:                  550–5550
+
+Persistence:                    6500–6600
+
+Network Scans/Reverse Shell: 7000–7020                                               -----------------                                                                                   (rule.id >= 5710 and rule.id <= 5766) or
+(rule.id >= 5400 and rule.id <= 5420) or
+(rule.id >= 5500 and rule.id <= 5516) or
+(rule.id >= 6000 and rule.id <= 6200) or
+(rule.id >= 550 and rule.id <= 5550) or
+(rule.id >= 6500 and rule.id <= 6600) or
+(rule.id >= 7000 and rule.id <= 7020)
+ --------------------------                                                                           ossec.conf içinde local rule yazmak istersen
+
+
+
+Örneğin sadece bu ruleID aralıklarını alert olarak işlemek için:
+
+
+
+<group name="linux_critical_mitre,">
+  <rule id="100100" level="10">
+    <if_sid>5710,5766,5400,5420,5500,5516,6000,6200,550,5550,6500,6600,7000,7020</if_sid>
+    <description>Linux MITRE ATT&CK Critical Events</description>
+  </rule>
+</group>
